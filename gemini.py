@@ -25,7 +25,15 @@ search_tool = {'google_search': {}}
 
 client = genai.Client(api_key=sys.argv[2])
 
-async def gemini_stream(bot:TeleBot, message:Message, m:str, model_type:str):
+async def gemini_stream(bot: TeleBot, message: Message, m: str, model_type: str) -> None:
+    """Stream a Gemini response to the user.
+
+    Parameters:
+        bot: Telegram bot instance used for sending messages.
+        message: Incoming Telegram message from the user.
+        m: Prompt text provided by the user.
+        model_type: Identifier of the Gemini model to use.
+    """
     sent_message = None
     try:
         sent_message = await bot.reply_to(message, "🤖 Генерирую ответ...")
@@ -104,7 +112,15 @@ async def gemini_stream(bot:TeleBot, message:Message, m:str, model_type:str):
         else:
             await bot.reply_to(message, f"{error_info}\nПодробности ошибки: {str(e)}")
 
-async def gemini_edit(bot: TeleBot, message: Message, m: str, photo_file: bytes):
+async def gemini_edit(bot: TeleBot, message: Message, m: str, photo_file: bytes) -> None:
+    """Edit an image using the Gemini model.
+
+    Parameters:
+        bot: Telegram bot instance used for sending messages.
+        message: Telegram message containing the photo.
+        m: Text prompt describing the desired edit.
+        photo_file: Raw bytes of the user's photo.
+    """
 
     image = Image.open(io.BytesIO(photo_file))
     try:
@@ -122,7 +138,14 @@ async def gemini_edit(bot: TeleBot, message: Message, m: str, photo_file: bytes)
             photo = part.inline_data.data
             await bot.send_photo(message.chat.id, photo)
 
-async def gemini_draw(bot:TeleBot, message:Message, m:str):
+async def gemini_draw(bot: TeleBot, message: Message, m: str) -> None:
+    """Generate an image or text response using the Gemini model.
+
+    Parameters:
+        bot: Telegram bot instance used for sending messages.
+        message: Incoming Telegram message from the user.
+        m: Prompt describing what to draw or generate.
+    """
     chat_dict = gemini_draw_dict
     if str(message.from_user.id) not in chat_dict:
         chat = client.aio.chats.create(

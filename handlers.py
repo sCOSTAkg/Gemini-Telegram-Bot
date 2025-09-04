@@ -17,6 +17,12 @@ default_model_dict      = gemini.default_model_dict
 gemini_draw_dict        = gemini.gemini_draw_dict
 
 async def start(message: Message, bot: TeleBot) -> None:
+    """Send a welcome message to the user.
+
+    Parameters:
+        message: Incoming Telegram message invoking the command.
+        bot: Telegram bot instance used for replies.
+    """
     try:
         await bot.reply_to(
             message,
@@ -27,6 +33,12 @@ async def start(message: Message, bot: TeleBot) -> None:
         await bot.reply_to(message, error_info)
 
 async def gemini_stream_handler(message: Message, bot: TeleBot) -> None:
+    """Handle /gemini command and stream a response.
+
+    Parameters:
+        message: Command message from the user.
+        bot: Telegram bot instance used for replies.
+    """
     try:
         m = message.text.strip().split(maxsplit=1)[1].strip()
     except IndexError:
@@ -39,6 +51,12 @@ async def gemini_stream_handler(message: Message, bot: TeleBot) -> None:
     await gemini.gemini_stream(bot, message, m, model_1)
 
 async def gemini_pro_stream_handler(message: Message, bot: TeleBot) -> None:
+    """Handle /gemini_pro command using the pro model.
+
+    Parameters:
+        message: Command message from the user.
+        bot: Telegram bot instance used for replies.
+    """
     try:
         m = message.text.strip().split(maxsplit=1)[1].strip()
     except IndexError:
@@ -51,6 +69,12 @@ async def gemini_pro_stream_handler(message: Message, bot: TeleBot) -> None:
     await gemini.gemini_stream(bot, message, m, model_2)
 
 async def clear(message: Message, bot: TeleBot) -> None:
+    """Clear chat history for the user.
+
+    Parameters:
+        message: Command message from the user.
+        bot: Telegram bot instance used for replies.
+    """
     # Check if the chat is already in gemini_chat_dict.
     if (str(message.from_user.id) in gemini_chat_dict):
         del gemini_chat_dict[str(message.from_user.id)]
@@ -61,6 +85,12 @@ async def clear(message: Message, bot: TeleBot) -> None:
     await bot.reply_to(message, "История очищена")
 
 async def switch(message: Message, bot: TeleBot) -> None:
+    """Switch the default model for the user.
+
+    Parameters:
+        message: Command message from the user.
+        bot: Telegram bot instance used for replies.
+    """
     if message.chat.type != "private":
         await bot.reply_to(message, "Эта команда доступна только в личном чате!")
         return
@@ -77,6 +107,12 @@ async def switch(message: Message, bot: TeleBot) -> None:
         await bot.reply_to(message, "Теперь вы используете "+model_1)
 
 async def gemini_private_handler(message: Message, bot: TeleBot) -> None:
+    """Handle messages in private chats using the default model.
+
+    Parameters:
+        message: User message in a private chat.
+        bot: Telegram bot instance used for replies.
+    """
     m = message.text.strip()
     if str(message.from_user.id) not in default_model_dict:
         default_model_dict[str(message.from_user.id)] = True
@@ -88,6 +124,12 @@ async def gemini_private_handler(message: Message, bot: TeleBot) -> None:
             await gemini.gemini_stream(bot,message,m,model_2)
 
 async def gemini_photo_handler(message: Message, bot: TeleBot) -> None:
+    """Process photo messages and send them to Gemini for editing.
+
+    Parameters:
+        message: Telegram message containing a photo.
+        bot: Telegram bot instance used for replies.
+    """
     if message.chat.type != "private":
         s = message.caption or ""
         if not s or not (s.startswith("/gemini")):
@@ -114,6 +156,12 @@ async def gemini_photo_handler(message: Message, bot: TeleBot) -> None:
         await gemini.gemini_edit(bot, message, m, photo_file)
 
 async def gemini_edit_handler(message: Message, bot: TeleBot) -> None:
+    """Handle the /edit command for photo editing.
+
+    Parameters:
+        message: Telegram message containing a photo and prompt.
+        bot: Telegram bot instance used for replies.
+    """
     if not message.photo:
         await bot.reply_to(message, "Пожалуйста, отправьте фотографию")
         return
@@ -129,6 +177,12 @@ async def gemini_edit_handler(message: Message, bot: TeleBot) -> None:
     await gemini.gemini_edit(bot, message, m, photo_file)
 
 async def draw_handler(message: Message, bot: TeleBot) -> None:
+    """Handle the /draw command to generate an image.
+
+    Parameters:
+        message: Command message with drawing prompt.
+        bot: Telegram bot instance used for replies.
+    """
     try:
         m = message.text.strip().split(maxsplit=1)[1].strip()
     except IndexError:

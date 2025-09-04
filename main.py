@@ -15,7 +15,8 @@ options = parser.parse_args()
 print("Аргументы обработаны.")
 
 
-async def main():
+async def main() -> None:
+    """Initialize the bot and start polling for messages."""
     # Init bot
     bot = AsyncTeleBot(options.tg_token)
     await bot.delete_my_commands(scope=None, language_code=None)
