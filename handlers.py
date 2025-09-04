@@ -1,9 +1,11 @@
 from telebot import TeleBot
 from telebot.types import Message
 from md2tgmd import escape
-import traceback
+import logging
 from config import conf
 import gemini
+
+logging.basicConfig(level=logging.INFO)
 
 error_info              =       conf["error_info"]
 before_generate_info    =       conf["before_generate_info"]
@@ -97,7 +99,7 @@ async def gemini_photo_handler(message: Message, bot: TeleBot) -> None:
             file_path = await bot.get_file(message.photo[-1].file_id)
             photo_file = await bot.download_file(file_path.file_path)
         except Exception:
-            traceback.print_exc()
+            logging.exception("Ошибка при обработке фото в группе")
             await bot.reply_to(message, error_info)
             return
         await gemini.gemini_edit(bot, message, m, photo_file)
@@ -108,7 +110,7 @@ async def gemini_photo_handler(message: Message, bot: TeleBot) -> None:
             file_path = await bot.get_file(message.photo[-1].file_id)
             photo_file = await bot.download_file(file_path.file_path)
         except Exception:
-            traceback.print_exc()
+            logging.exception("Ошибка при обработке фото в личном чате")
             await bot.reply_to(message, error_info)
             return
         await gemini.gemini_edit(bot, message, m, photo_file)
@@ -123,7 +125,7 @@ async def gemini_edit_handler(message: Message, bot: TeleBot) -> None:
         file_path = await bot.get_file(message.photo[-1].file_id)
         photo_file = await bot.download_file(file_path.file_path)
     except Exception as e:
-        traceback.print_exc()
+        logging.exception("Ошибка при редактировании изображения")
         await bot.reply_to(message, e.str())
         return
     await gemini.gemini_edit(bot, message, m, photo_file)

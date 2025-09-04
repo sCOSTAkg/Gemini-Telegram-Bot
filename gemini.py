@@ -1,6 +1,6 @@
 import io
 import time
-import traceback
+import logging
 import sys
 from PIL import Image
 from telebot.types import Message
@@ -8,6 +8,8 @@ from md2tgmd import escape
 from telebot import TeleBot
 from config import conf, generation_config
 from google import genai
+
+logging.basicConfig(level=logging.INFO)
 
 gemini_draw_dict = {}
 gemini_chat_dict = {}
@@ -71,7 +73,7 @@ async def gemini_stream(bot:TeleBot, message:Message, m:str, model_type:str):
                                 )
                         else:
                             if "message is not modified" not in str(e).lower():
-                                print(f"Ошибка обновления сообщения: {e}")
+                                logging.warning(f"Ошибка обновления сообщения: {e}")
                     last_update = current_time
 
         try:
@@ -90,11 +92,11 @@ async def gemini_stream(bot:TeleBot, message:Message, m:str, model_type:str):
                         message_id=sent_message.message_id
                     )
             except Exception:
-                traceback.print_exc()
+                logging.exception("Не удалось обновить сообщение после обработки Markdown")
 
 
     except Exception as e:
-        traceback.print_exc()
+        logging.exception("Ошибка в gemini_stream")
         if sent_message:
             await bot.edit_message_text(
                 f"{error_info}\nПодробности ошибки: {str(e)}",
