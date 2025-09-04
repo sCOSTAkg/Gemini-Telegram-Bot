@@ -36,6 +36,7 @@ async def gemini_stream_handler(message: Message, bot: TeleBot) -> None:
             parse_mode="MarkdownV2",
         )
         return
+    await bot.reply_to(message, before_generate_info)
     await gemini.gemini_stream(bot, message, m, model_1)
 
 async def gemini_pro_stream_handler(message: Message, bot: TeleBot) -> None:
@@ -48,6 +49,7 @@ async def gemini_pro_stream_handler(message: Message, bot: TeleBot) -> None:
             parse_mode="MarkdownV2",
         )
         return
+    await bot.reply_to(message, before_generate_info)
     await gemini.gemini_stream(bot, message, m, model_2)
 
 async def clear(message: Message, bot: TeleBot) -> None:
@@ -80,12 +82,10 @@ async def gemini_private_handler(message: Message, bot: TeleBot) -> None:
     m = message.text.strip()
     if str(message.from_user.id) not in default_model_dict:
         default_model_dict[str(message.from_user.id)] = True
-        await gemini.gemini_stream(bot,message,m,model_1)
-    else:
-        if default_model_dict[str(message.from_user.id)]:
-            await gemini.gemini_stream(bot,message,m,model_1)
-        else:
-            await gemini.gemini_stream(bot,message,m,model_2)
+
+    model = model_1 if default_model_dict[str(message.from_user.id)] else model_2
+    await bot.reply_to(message, before_generate_info)
+    await gemini.gemini_stream(bot, message, m, model)
 
 async def gemini_photo_handler(message: Message, bot: TeleBot) -> None:
     if message.chat.type != "private":
@@ -93,6 +93,7 @@ async def gemini_photo_handler(message: Message, bot: TeleBot) -> None:
         if not s or not (s.startswith("/gemini")):
             return
         try:
+            await bot.reply_to(message, download_pic_notify)
             m = s.strip().split(maxsplit=1)[1].strip() if len(s.strip().split(maxsplit=1)) > 1 else ""
             file_path = await bot.get_file(message.photo[-1].file_id)
             photo_file = await bot.download_file(file_path.file_path)
@@ -100,10 +101,12 @@ async def gemini_photo_handler(message: Message, bot: TeleBot) -> None:
             traceback.print_exc()
             await bot.reply_to(message, error_info)
             return
+        await bot.reply_to(message, before_generate_info)
         await gemini.gemini_edit(bot, message, m, photo_file)
     else:
         s = message.caption or ""
         try:
+            await bot.reply_to(message, download_pic_notify)
             m = s.strip().split(maxsplit=1)[1].strip() if len(s.strip().split(maxsplit=1)) > 1 else ""
             file_path = await bot.get_file(message.photo[-1].file_id)
             photo_file = await bot.download_file(file_path.file_path)
@@ -111,6 +114,7 @@ async def gemini_photo_handler(message: Message, bot: TeleBot) -> None:
             traceback.print_exc()
             await bot.reply_to(message, error_info)
             return
+        await bot.reply_to(message, before_generate_info)
         await gemini.gemini_edit(bot, message, m, photo_file)
 
 async def gemini_edit_handler(message: Message, bot: TeleBot) -> None:
@@ -119,6 +123,7 @@ async def gemini_edit_handler(message: Message, bot: TeleBot) -> None:
         return
     s = message.caption or ""
     try:
+        await bot.reply_to(message, download_pic_notify)
         m = s.strip().split(maxsplit=1)[1].strip() if len(s.strip().split(maxsplit=1)) > 1 else ""
         file_path = await bot.get_file(message.photo[-1].file_id)
         photo_file = await bot.download_file(file_path.file_path)
@@ -126,6 +131,7 @@ async def gemini_edit_handler(message: Message, bot: TeleBot) -> None:
         traceback.print_exc()
         await bot.reply_to(message, e.str())
         return
+    await bot.reply_to(message, before_generate_info)
     await gemini.gemini_edit(bot, message, m, photo_file)
 
 async def draw_handler(message: Message, bot: TeleBot) -> None:
@@ -140,7 +146,7 @@ async def draw_handler(message: Message, bot: TeleBot) -> None:
         return
     
     # reply to the message first, then delete the "drawing..." message
-    drawing_msg = await bot.reply_to(message, "Рисую...")
+    drawing_msg = await bot.reply_to(message, before_generate_info)
     try:
         await gemini.gemini_draw(bot, message, m)
     finally:
