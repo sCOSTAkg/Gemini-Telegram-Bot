@@ -1,5 +1,12 @@
 # Gemini_Telegram_Bot
 A Telegram Bot using Gemini API
+
+## Key Features
+- Multi-turn conversations in private chats and groups, with both command and free-form prompts supported.
+- Image generation via **/draw** and image editing via **/edit** for quick AIGC workflows.
+- Switch the default model on demand using **/switch** to balance quality and cost.
+- Reset the ongoing conversation with **/clear** to remove stored context and protect privacy.
+- Multiple deployment options including Docker, Railway, and Zeabur for flexible hosting.
 # Demo
 [Click here](https://t.me/gemini_telegram_demo_bot)
 
@@ -48,6 +55,25 @@ docker run -d --restart=always -e TELEGRAM_BOT_API_KEY={Telegram Bot API} -e GOO
 Click on the button below for a one-click deployment.
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/HIsbMv?referralCode=4LyW6R)
+
+### Manual deployment steps
+1. Create a new project on Railway and choose **Deploy from GitHub repo** or import this repository via the template link above.
+2. In the project **Variables**, add:
+   - `TELEGRAM_BOT_API_KEY`: your Telegram Bot API token.
+   - `GOOGLE_GEMINI_KEY`: your Gemini API key.
+3. Under **Settings → Deployments**, set the start command to:
+   ```
+   python main.py $TELEGRAM_BOT_API_KEY
+   ```
+4. If Railway prompts for a `PORT`, you can keep the default value because the bot does not expose an HTTP server.
+5. Trigger a deployment and wait for the build to finish. Once complete, the bot will stay online on Railway.
+
+### Launching & managing integrations (Railway web panel)
+1. After the build finishes, open the service **Deployments** panel and click **Redeploy** or **Start** to boot the bot process.
+2. Use the **Variables** tab to update `TELEGRAM_BOT_API_KEY` and `GOOGLE_GEMINI_KEY` at any time, then click **Deployments → Deploy now** to apply the refreshed integration settings.
+3. To expose common bot commands in Telegram, visit [BotFather](https://t.me/BotFather) and run `/setcommands`, listing commands such as `gemini`, `draw`, `edit`, `switch`, and `clear`. Railway will load them automatically on the next start.
+4. Monitor runtime status via the **Metrics / Logs** pages, and restart or stop the bot directly from the web UI through **Actions → Restart service** when needed.
+5. If you want to extend integrations with extra services (for example, a database or cache), add new services inside the same Railway project and share their connection strings through environment variables—no code changes are required.
 
 ## (4)Deploy on Zeabur
 Click on the button below for a one-click deployment.
