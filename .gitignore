@@ -163,3 +163,5 @@ cython_debug/
 
 .vs/
 
+bot_database.db
+test_handlers.db
